@@ -1,17 +1,19 @@
 package main
 
 import (
+	"cmargonis.dev/agenda-manager/configuration"
 	"fmt"
-	"os"
 	"strings"
-
 	"github.com/nlopes/slack"
 )
 
-func main() {
+type AuthConfiguration interface {
+	GetToken() string
+}
 
-	token := os.Getenv("SLACK_TOKEN")
-	api := slack.New(token)
+func main() {
+	var conf AuthConfiguration = configuration.NewFileConfiguration()
+	api := slack.New(conf.GetToken())
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
 
@@ -30,7 +32,7 @@ Loop:
 				prefix := fmt.Sprintf("<@%s> ", info.User.ID)
 
 				if ev.User != info.User.ID && strings.HasPrefix(ev.Text, prefix) {
-					rtm.SendMessage(rtm.NewOutgoingMessage("Hello folks, this is a Test!", ev.Channel))
+					rtm.SendMessage(rtm.NewOutgoingMessage("Hello folks, agenda automation comming soon:tm:!", ev.Channel))
 				}
 
 			case *slack.RTMError:
