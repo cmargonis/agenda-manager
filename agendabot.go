@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
 	"cmargonis.dev/agenda-manager/configuration"
+	"cmargonis.dev/agenda-manager/dispatcher"
 	"github.com/nlopes/slack"
 )
 
@@ -30,11 +30,7 @@ Loop:
 			case *slack.MessageEvent:
 				fmt.Printf("Message: %v\n", messageData)
 				info := rtm.GetInfo()
-				prefix := fmt.Sprintf("<@%s> ", info.User.ID)
-
-				if messageData.User != info.User.ID && strings.HasPrefix(messageData.Text, prefix) {
-					rtm.SendMessage(rtm.NewOutgoingMessage("Hello folks, agenda automation comming soon:tm:!", messageData.Channel))
-				}
+				dispatcher.CheckForCommand(messageData.Text, messageData.User, messageData.Channel, info.User.ID)
 
 			case *slack.RTMError:
 				fmt.Printf("Error: %s\n", messageData.Error())
