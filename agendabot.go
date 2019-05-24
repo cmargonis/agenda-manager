@@ -1,9 +1,10 @@
 package main
 
 import (
-	"cmargonis.dev/agenda-manager/configuration"
 	"fmt"
 	"strings"
+
+	"cmargonis.dev/agenda-manager/configuration"
 	"github.com/nlopes/slack"
 )
 
@@ -13,8 +14,8 @@ type AuthConfiguration interface {
 
 func main() {
 	var conf AuthConfiguration = configuration.NewFileConfiguration()
-	api := slack.New(conf.GetToken())
-	rtm := api.NewRTM()
+	slackApi := slack.New(conf.GetToken())
+	rtm := slackApi.NewRTM()
 	go rtm.ManageConnection()
 
 Loop:
@@ -22,21 +23,21 @@ Loop:
 		select {
 		case msg := <-rtm.IncomingEvents:
 			fmt.Print("Event Received: ")
-			switch ev := msg.Data.(type) {
+			switch messageData := msg.Data.(type) {
 			case *slack.ConnectedEvent:
-				fmt.Println("Connection counter:", ev.ConnectionCount)
+				fmt.Println("Connection counter:", messageData.ConnectionCount)
 
 			case *slack.MessageEvent:
-				fmt.Printf("Message: %v\n", ev)
+				fmt.Printf("Message: %v\n", messageData)
 				info := rtm.GetInfo()
 				prefix := fmt.Sprintf("<@%s> ", info.User.ID)
 
-				if ev.User != info.User.ID && strings.HasPrefix(ev.Text, prefix) {
-					rtm.SendMessage(rtm.NewOutgoingMessage("Hello folks, agenda automation comming soon:tm:!", ev.Channel))
+				if messageData.User != info.User.ID && strings.HasPrefix(messageData.Text, prefix) {
+					rtm.SendMessage(rtm.NewOutgoingMessage("Hello folks, agenda automation comming soon:tm:!", messageData.Channel))
 				}
 
 			case *slack.RTMError:
-				fmt.Printf("Error: %s\n", ev.Error())
+				fmt.Printf("Error: %s\n", messageData.Error())
 
 			case *slack.InvalidAuthEvent:
 				fmt.Printf("Invalid credentials")
