@@ -15,12 +15,12 @@ func TestMessageDirectedToUser(t *testing.T) {
 	messageText := prefix + " Hello World"
 	result := isMessageDirectedToUser(messageText, userId)
 
-	assert.Equal(t, result, true, "Expected true, got false")
+	assert.True(t, result, "Expected true, got false")
 }
 
 func TestMessageNotDirectedToUser(t *testing.T) {
 	messageText := "Hello World"
 	result := isMessageDirectedToUser(messageText, userId)
 
-	assert.Equal(t, result, false, "Expected false, got true")
+	assert.False(t, result, "Expected false, got true")
 }
